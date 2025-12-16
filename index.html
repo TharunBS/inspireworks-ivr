@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InspireWorks IVR Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-group .hint {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            display: block;
+        }
+
+        .flow-diagram {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .flow-diagram h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .flow-diagram pre {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: #555;
+            overflow-x: auto;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-text {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📞 InspireWorks IVR Demo</h1>
+            <p>Plivo Voice API Integration</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-group">
+                <label for="targetNumber">Target Phone Number</label>
+                <input 
+                    type="tel" 
+                    id="targetNumber" 
+                    placeholder="+1234567890"
+                    value=""
+                >
+                <p class="hint">Enter the number to call (with country code, e.g., +91XXXXXXXXXX)</p>
+            </div>
+            
+            <button class="btn" id="callBtn" onclick="makeCall()">
+                🚀 Initiate Outbound Call
+            </button>
+            
+            <div class="status" id="status"></div>
+            
+            <div class="flow-diagram">
+                <h3>📋 IVR Call Flow</h3>
+                <pre>
+┌─────────────────────────────────────┐
+│         LEVEL 1: Language           │
+│   Press 1 → English                 │
+│   Press 2 → Español                 │
+└──────────────┬──────────────────────┘
+               │
+    ┌──────────┴──────────┐
+    ▼                     ▼
+┌─────────────┐    ┌─────────────┐
+│  English    │    │  Spanish    │
+│  Menu       │    │  Menu       │
+└──────┬──────┘    └──────┬──────┘
+       │                  │
+  ┌────┴────┐        ┌────┴────┐
+  ▼         ▼        ▼         ▼
+Press 1   Press 2  Press 1   Press 2
+Audio     Connect  Audio     Connect
+                </pre>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Powered by <a href="https://www.plivo.com" target="_blank">Plivo API</a>
+        </div>
+    </div>
+
+    <script>
+        async function makeCall() {
+            const targetNumber = document.getElementById('targetNumber').value.trim();
+            const btn = document.getElementById('callBtn');
+            const status = document.getElementById('status');
+            
+            // Validate input
+            if (!targetNumber) {
+                showStatus('error', '❌ Please enter a target phone number');
+                return;
+            }
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '📞 Calling...';
+            showStatus('loading', '<span class="loading-text">⏳ Initiating call, please wait...</span>');
+            
+            try {
+                const response = await fetch('/make-call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        target_number: targetNumber
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('success', `✅ ${data.message}<br><small>Call UUID: ${data.call_uuid}</small>`);
+                } else {
+                    showStatus('error', `❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                showStatus('error', `❌ Network error: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Initiate Outbound Call';
+            }
+        }
+        
+        function showStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = 'status ' + type;
+            status.innerHTML = message;
+        }
+        
+        // Allow Enter key to trigger call
+        document.getElementById('targetNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeCall();
+            }
+        });
+    </script>
+</body>
+</html>
